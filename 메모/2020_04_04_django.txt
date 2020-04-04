@@ -1,0 +1,124 @@
+## 장고 시작하기
+
+# 1. 작업환경 만들기
+
+작업할 폴더를 만들고 커맨드창(혹은 터미널)을 열어 
+해당 프로젝트 폴더로 이동후 장고 프로젝트 생성
+
+django-admin startproject config .
+django-admin startapp (앱 이름)
+python -m venv myvenv (리눅스나 맥 이용자는 python3 -m venv myvenv)
+
+를 이용하여 프로젝트 생성함.
+
+아래 명령어를 사용하여 가상환경 진입
+cd myvenv
+cd scripts
+activate.bat
+
+리눅스나 맥 이용자 :
+cd myvenv
+cd bin
+source activate
+
+cd ..
+cd ..
+를 사용하여 프로젝트 메인 폴더로 이동
+
+ps) 장고 설치시 
+pip install django pylint   # pylint는 VSCODE를 사용하기 위함.
+(맥 이용자는  pip3 install django pylint)
+
+VSCODE 실행.
+
+
+# 2. 마이그레이션 만들기, 슈퍼유저 생성
+
+> python manage.py makemigrations  # DB의 형식등을 언어로 바꿔주는 역할
+> python manage.py migrate    	 # 위에서 만든 migrations파일들을 통해 실제 마이그레이트 해줌
+> python manage.py createsuperuser # 슈퍼유저 생성
+
+
+# 3. 서버 실행해보기
+
+> python manage.py runserver   # 서버를 끌때에는 ctrl + c
+
+
+# 4. 모델 작성하기
+
+장고는 데이터베이스를 띄우는 페이지를 만들기 위해서 보통 모델부터 작성한다.
+
+mysite/models.py에서 아래와 같이 예제로 작성
+
+class BlogModel(models.Model):
+	content = models.CharField(max_length = 50, verbose_name = '내용')  # CharField는 글자수를 미리 정해놓음
+	who = models.CharField(max_length = 20, verbose_name = '글쓴이')     # max_length옵션이 없으면 오류 발생
+
+
+# 5. 앱 등록하기
+
+settings.py 파일 열기
+
+조금 내리다보면 INSTALLED_APPS 부분 마지막 부분에 앱을 추가해준다
+'mysite',
+
+
+# 5. 마이그레이션 파일 만들기
+
+커맨드 창에 아래와 같이 입력
+
+> python manage.py makemigrations
+
+웬만하면 migrations 파일은 건드리지 않는게 좋음
+
+
+# 6. 실제 DB에 적용하기
+
+커맨드창에 아래와 같이 입력
+
+> python manage.py migrate
+
+생성 완료했다는 메세지가 뜰 것 이다.
+
+
+# 7. admin에 모델 등록
+
+admin.py 파일 열기
+
+모델을 임포트 한다
+from .models import BlogModel
+
+아래에 작성
+admin.site.register(BlogModel)
+
+서버 구동하여 확인
+> python manage.py runserver
+
+
+# 8. admin 페이지 접속하여 확인
+
+서버 주소로 들어가서 확인해보면 이전과 다르지 않지만 이것은 사용자 페이지이다.
+주소 뒷부분에 /admin 을 입력하여 admin 페이지로 이동
+
+Username : 위에서 만든 superuser 아이디 입력
+Password : superuser 패스워드 입력
+
+MYSITE 라는 앱이 등록되어 있고 들어가서 내용과 글쓴이를 작성해보자.
+
+
+# 9. 다른 방식으로도 접근 가능
+
+VSCODE 커맨드창에 아래와 같이 입력
+
+> python manage.py shell
+
+mysite 안의 models.py 의 BlogModel 임포트 한다.
+> from mysite.models import BlogModel
+
+등록했던 데이터를 보는 방법
+> BlogModel.objects.all()
+
+쉘에서 데이터 등록도 가능
+> BlogModel.objects.create(content = 'Meteor', who = 'ChangMo')
+
+admin 페이지로 접속해 확인해보면 위에서 만든 데이터가 보일것이다.
