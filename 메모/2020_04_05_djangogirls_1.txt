@@ -1,0 +1,126 @@
+#### djangogirs 프로젝트
+
+#----------------------------------------------------------------
+
+# 1. 장고 프로젝트 만들기
+
+터미널에 아래와 같이 입력
+$ django-admin startproject mysite .
+
+djangogirls
+├───manage.py
+└───mysite
+        settings.py
+        urls.py
+        wsgi.py
+        __init__.py
+
+위와 같은 구조가 생성 됨.
+
+
+# 2. 설정 변경
+
+mysite/settings.py
+
+TIME_ZONE = 'Asia/Seoul'  # 시간대를 한국 시간대로 변경
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')   # 이 코드를 추가
+
+
+# 3. 데이터베이스 설정
+
+콘솔창에 아래와 같이 입력
+$ python manage.py migrate
+
+잘 작동되는지 확인하려면 콘솔창에 아래와같이 입력
+$ python manage.py runserver
+
+http://127.0.0.1:8000/  # 브라우저 주소 입력창에 주소를 치고 들어간다.
+
+#----------------------------------------------------------------
+
+# 1. 모델 만들기
+
+Post(게시글)
+--------
+title(제목)
+text(내용)
+author(글쓴이)
+created_date(작성일)
+published_date(게시일)
+
+이러한 구조로 만들 예정이다.
+
+커맨드창에 아래와 같이 입력
+$ python manage.py startapp blog
+
+    djangogirls
+    ├── mysite
+    |       __init__.py
+    |       settings.py
+    |       urls.py
+    |       wsgi.py
+    ├── manage.py
+    └── blog
+        ├── migrations
+        |       __init__.py
+        ├── __init__.py
+        ├── admin.py
+        ├── models.py
+        ├── tests.py
+        └── views.py
+
+위와 같은 구조가 됨.
+
+
+# 2. 앱 등록
+
+mysite/settings.py
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'blog',	# blog를 추가해준다.
+]
+
+
+# 3. blog 모델 만들기
+
+코드를 아래와 같이 입력하고 설명은 주석
+
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
+
+# Create your models here.
+
+
+class Post(models.Model):   # models는 POST가 장고 모델임을 의미. 이 코드때문에 장고는 POST가 DB에 저장되어야 한다고 알게 됨.
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # ForeignKey() : 다른모델에 대한 링크를 의미
+    title = models.CharField(max_length = 200)  # CharField() : 글자수가 제한된 텍스트. 즉 제목같은 제한된 텍스트에서 사용 됨
+    text = models.TextField()                   # TextField() : 글자수 제한이 없는 텍스트
+    created_date = models.DateTimeField(default=timezone.now)   # DateTimeField() : 날짜와 시간을 의미
+    published_date = models.DateTimeField(blank=True, null=True)
+
+    def publish(self):
+        self.published_date = timezone.now()
+        self.save()
+    
+    def __str__(self):
+        return self.title
+
+#----------------------------------------------------------------
+
+# 데이터베이스 모델을 위한 테이블 만들기
+
+커맨드라인에 아래와 같이 입력
+$ python manage.py makemigrations blog
+
+모델을 데이터베이스에 반영
+$ python manage.py migrate blog
+
